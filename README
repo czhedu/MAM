@@ -1,0 +1,69 @@
+
+@author By Zhenhua Cai
+@date   2011-08-01
+
+===============================================================================
+
+What is MAM?
+
+MAM stands for Multilayer Affective Modulation, which is an emotional model for multi-agents modelling or robotics in the real world. The origin of the project is for my PhD thesis. However, I finally decided to make something really useful. My goal is to make MAM flexible enough that can be used for both cognitive/ emotional research and engineering usage. MAM borrowed many source code from my previous project TinyPsi (at http://sourceforge.net/projects/tinypsi/ ), which is not active any more. 
+
+===============================================================================
+
+Architecture
+
+Lowest layer, reactive layer, related to unconsciousness behavior
+Middle layer, goal oriented layer, related to rational planning
+Abstract layer, reflective layer, related to self-consciousness
+
+===============================================================================
+
+Knowledge representation
+
+Long term, preserve for leaning (data mining), graph storage
+Short term, ready to use (reasoning), all sorts of representations
+
+===============================================================================
+
+Directory arrangement
+
+mind:        base class of mind server and agent
+mam:         mind agents for multilayer affective modulation 
+knowledge:   get/set knowledge base (using Object Relation Mapping)
+reasoning:   backward/ forward chaining
+learning:    all sorts of learning/ data mining algorithms on long term memory
+message:     message system that connects different components, especial mind and world
+world:       sample worlds and their corresponding world interface, knowledge
+             database and scripts. We should add ros for robotics in future
+visualizer:  visualization tools to better understand the whole system
+tutorial:    demos of using mam (low priority)
+test:        unit tests (low priority)
+lib:         searching library cmake scripts
+util:        miscellaneous utilities               
+third_party: third party packages            
+doc:         all sorts of documents, including our papers and references
+bin:         all sorts of executive files         
+
+===============================================================================
+
+Planning
+
+deadline: submit a paper by the end of October
+
+01 week: technical ideas for all the components 
+02 week: paper ideas, outlines and reuse code from tinypsi
+03 week:         
+04 week:
+05 week:
+06 week:
+07 week:
+08 week:
+09 week:
+10 week:
+11 week:
+12 week:
+13 week:
+14 week:
+15 week:
+16 week: 
+
