@@ -1,0 +1,58 @@
+A measure of similarity between graph vertices: Applications to synonym extraction and web searching
+P15
+Application of Automatic Extraction of Synonyms from dictionary
+
+Automatic Discovery of Similar Words
+P2
+Methods of discovering similar words from a large corpus
+a. straight forward method: document vector space model and cosine similarity measure
+b. term vector space model and term discrimination values
+c. partial syntactical analysis
+
+Automatic discovery of synonyms and lexicalizations from the Web
+P4
+Synonym and lexicalizations discovery based on search engine query
+
+Automatic ontology-based knowledge extraction from web documents
+P3
+Architecture of knowledge extraction system for artists
+
+Automatic Synonym Extraction
+P1
+Models based on the subject and object relation give the most consistent result. 
+Models based on adjective modifications gives the best results.
+P2
+Words with similar meaning tend to occur in similar contexts and a word's meaning can be modelled as a function of the contexts it occurs in. 
+P3
+Distributional models: a word's meaning can be induced from the contexts it appears in. 
+
+Data mining for web intelligence
+General introduction of data mining for web intelligence
+
+Ez. wordnet: Principles for automatic generation of a coarse grained wordnet
+P6
+A set of semantic and probabilistic rules to either collapse synsets very similar in meaning or drop synsets that are very rarely used. 
+
+Finding synonyms using automatic word alignment and measures of distributional similarity
+P1
+How to make a clear distinction between synonyms on one hand and related words such as antonyms on the other hand. Maybe we can use translations!!!
+
+Graph-based word clustering using a web search engine
+P1 
+word clustering for Japanese 
+
+Measuring semantic similarity between words using web search engines
+
+Mining the Web for Synonyms: PMI-IR versus LSA on TOEFL
+PMI algorithm
+
+Ontology learning from text: A survey of Methods
+P5
+Three kinds of ontology
+P9
+Bootstrapping 
+
+Semi-automatic ontology extension using spreading activation
+P6
+Spreading Activation Processing over the Semantic Network
+
