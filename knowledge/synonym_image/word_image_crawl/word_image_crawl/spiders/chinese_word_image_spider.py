@@ -1,4 +1,6 @@
 #
+# -*- coding: utf-8 -*-
+#
 # Fetch images from google search engine 
 #
 # @author Zhenhua Cai <czhedu@gmail.com>
@@ -13,33 +15,56 @@
 
 import re
 from scrapy import log
+from scrapy.conf import settings
 from scrapy.spider import BaseSpider
 from scrapy.http import Request
 
 class ChineseWordImageSpider(BaseSpider):
-    def __init__(self):
-        BaseSpider.__init__(self)
-        self.reobj_image = re.compile(r"http://\S+.gstatic.com[^\"\s]+")
 
     name = "image.google.com_chinese"
-    start_urls = [
-        "http://images.google.com/search?tbm=isch&q=apple&start=0"
 
-#        "http://images.google.com/search?tbm=isch&q=girl",
-#        "http://images.google.com/search?tbm=isch&q=man",
-#        "http://images.google.com/search?tbm=isch&q=woman",
-#        "http://images.google.com/search?tbm=isch&q=apple"
-    ]
+    def __init__(self):
+        BaseSpider.__init__(self)
+
+        # settings 
+        settings.overrides['DOWNLOAD_DELAY'] = 0.2
+
+        # regex object for extracting image url
+        self.reobj_image = re.compile(r"http://\S+.gstatic.com[^\"\s]+")
+
+        self.start_urls = [
+            # the url should be end with start=xx    
+            "http://images.google.com/search?tbm=isch&safe=off&q=美女&start=0"
+        ]
+
+        self.num_images_per_page = 20
+        self.num_images = 200
 
     def parse(self, response):
+        # if it is an html page
         if "images.google.com" in response.url:
+            # extract image urls and send requests
             image_link_list = self.reobj_image.findall(response.body)
 
             for image_link in image_link_list:
                 yield Request(image_link, callback=self.parse)
 
+            # launch more/new searches to google
+            start_equal_index = response.url.rindex("=")
+            url_without_start = response.url[ :start_equal_index+1]
+            new_start = int( response.url[start_equal_index+1: ] ) + self.num_images_per_page
+
+            # invoke more search to the same word
+            if new_start<self.num_images: 
+                yield Request(url_without_start + str(new_start), callback=self.parse)
+            # invoke the search to the new word    
+            else:
+                pass
+
+
+        # if it is an image file
         else:
-            file_name = "data/" + response.url[response.url.rindex(":")+1:]
+            file_name = "data/" + response.url[response.url.rindex(":")+1: ]
             open(file_name, 'wb').write(response.body)
 
 
