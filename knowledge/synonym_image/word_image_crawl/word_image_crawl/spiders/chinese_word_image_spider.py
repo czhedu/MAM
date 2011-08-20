@@ -4,7 +4,7 @@
 # Fetch images from google search engine 
 #
 # @author Zhenhua Cai <czhedu@gmail.com>
-# @date   2011-08-18
+# @date   2011-08-20
 # 
 # Below is an example of image link in google server
 #     data-src="http://t3.gstatic.com/images?q=tbn:ANd9GcQzA4FrQnpyiUbdTXzXpxCrzXSYjcq29Ds8c6MwI9KQV2FmilZH"
@@ -16,6 +16,7 @@
 import re
 import uuid
 import sqlite3
+import urlparse
 
 from scrapy import log
 from scrapy.conf import settings
@@ -31,71 +32,74 @@ class ChineseWordImageSpider(BaseSpider):
 
         # settings 
         settings.overrides['DOWNLOAD_DELAY'] = 0
+        settings.overrides['LOG_FILE'] = "scrapy.log"
+        settings.overrides['LOG_STDOUT'] = True
+        settings.overrides['DOWNLOAD_TIMEOUT'] = 180
+        settings.overrides['RETRY_TIMES'] = 10
+
+        self.num_images_per_page = 20
+        self.num_images = 60
+
+        # base url for image searching
+        self.base_url = "http://images.google.com/search?tbm=isch&safe=off"
 
         # regex object for extracting image url
         self.reobj_image = re.compile(r"http://\S+.gstatic.com[^\"\s]+")
 
-        self.num_images_per_page = 20
-        self.num_images = 20
+        # initialize start_urls
+        self.fill_start_urls()
 
-        # get word list
+    def fill_start_urls(self):
+        '''Append more urls in start urls'''
 #        f_word_dict = file(r'SogouLabDic_tab_utf8_linux.dic')
-        f_word_dict = file(r'test_dict') 
-        self.word_lines = f_word_dict.readlines()
+        f_word_dict = file(r'temp.dic') 
+        word_lines = f_word_dict.readlines()
+        f_word_dict.close()
 
-        # create initial url (the url should be end with start=xx)
-        self.base_url = "http://images.google.com/search?tbm=isch&safe=off"
-
-        word_line = self.word_lines[0];
-        del self.word_lines[0]; 
-
-        self.word = word_line[ : word_line.index("\t")]
-        self.start_urls = [self.base_url + "&q=" + self.word + "&start=0"]
+        for word in word_lines:
+#            word = word_line[ : word_line.index("\t")]
+            start = 0 
+            while start < self.num_images:
+                self.start_urls.append( self.base_url + 
+                                        "&q=" + word + 
+                                        "&start=" + str(start)
+                                      )
+                start += self.num_images_per_page
 
     def parse(self, response):
         # if it is an html page
         if "images.google.com" in response.url:
-            # extract image urls, record word-image relation and send requests
+            # get word
+            query = urlparse.urlparse(response.url).query
+            word = urlparse.parse_qs(query)["q"][0].decode("utf-8")
+
+            # extract image urls 
             image_link_list = self.reobj_image.findall(response.body)
 
+            # open database
             con = sqlite3.connect('word_image.db3')
             cur = con.cursor()
+
+            # send requests for all the images and record word-image relation
             for image_link in image_link_list:
+                # get image name
+                image_name = image_link[image_link.rindex(":")+1: ]
+
                 # record word-image relation
                 uuid_str = str(uuid.uuid4())
-                image = image_link[image_link.rindex(":")+1: ]
 
                 sql = 'INSERT INTO word_image (uuid, word, image) VALUES("%s", "%s", "%s")' % \
-                      (uuid_str, self.word, image)
+                      (uuid_str, word, image_name)
 
                 cur.execute(sql) 
                 con.commit()
-              
+
                 # send request for the image
                 yield Request(image_link, callback=self.parse)
 
-            # update start parameter for next page of images
-            start_equal_index = response.url.rindex("=")
-            url_without_start = response.url[ :start_equal_index+1]
-            new_start = int( response.url[start_equal_index+1: ] ) + self.num_images_per_page
-
-            # invoke more search to the same word
-            if new_start < self.num_images: 
-                yield Request(url_without_start + str(new_start), callback=self.parse)
-            # invoke the search to the new word    
-            else:
-                if len(self.word_lines): 
-                    word_line = self.word_lines[0]
-                    del self.word_lines[0]
-
-                    self.word = word_line[ : word_line.index("\t")]
-                    print self.word
-                    search_word_url = self.base_url + "&q=" + self.word + "&start=0"
-                    yield Request(search_word_url, callback=self.parse)
-
-        # if it is an image file
+        # if it is an image file, save it
         else:
-            file_name = "data/" + response.url[response.url.rindex(":")+1: ]
-            open(file_name, 'wb').write(response.body)
-
+            # save image file
+            image_name = response.url[response.url.rindex(":")+1: ]
+            open("data/" + image_name, 'wb').write(response.body)
 
