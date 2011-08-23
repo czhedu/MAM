@@ -4,7 +4,7 @@
 # Fetch chinese treasures from www.365zn.com/fyc 
 #
 # @author Zhenhua Cai <czhedu@gmail.com>
-# @date   2011-08-22
+# @date   2011-08-24
 # 
 # Below is an example of word list page link 
 #     http://www.365zn.com/fyc/fyc_c.htm
@@ -111,29 +111,35 @@ class znChineseTreasureSpider(BaseSpider):
         synonym_fragment = self.reobj_synonym.search(html)
         antonym_fragment = self.reobj_antonym.search(html)
 
+        synonym_str = ""
+        antonym_str = ""
+
         if synonym_fragment:
             for synonym in self.reobj_chinese.findall( synonym_fragment.group(1) ):
-                print synonym
+                synonym_str += synonym + ","
+
+        if len(synonym_str) > 0:
+            synonym_str = synonym_str[ : len(synonym_str)-1]
 
         if antonym_fragment:     
             for antonym in self.reobj_chinese.findall( antonym_fragment.group(1) ): 
-                print antonym
+                antonym_str += antonym + ","
 
-#    def parse(self, response):
-#            # open database
-#            con = sqlite3.connect('word_image.db3')
-#            cur = con.cursor()
-#
-#            # send requests for all the images and record word-image relation
-#            for image_link in image_link_list:
-#                # get image name
-#                image_name = image_link[image_link.rindex(":")+1: ]
-#
-#                # record word-image relation
-#                uuid_str = str(uuid.uuid4())
-#
-#                sql = 'INSERT INTO word_image (uuid, word, image) VALUES("%s", "%s", "%s")' % \
-#                      (uuid_str, word, image_name)
-#
-#                cur.execute(sql) 
-#                con.commit()
+        if len(antonym_str) > 0:
+            antonym_str = antonym_str[ : len(antonym_str)-1]
+
+        print "word: " + word + " synonyms: " + synonym_str + " antonyms: " + antonym_str
+
+        # open database
+        con = sqlite3.connect('chinese_treasures.sqlite')
+        cur = con.cursor()
+
+        # record word, synonyms and antonyms
+        uuid_str = str(uuid.uuid4())
+
+        sql = 'INSERT INTO chinese_treasures (uuid, word, synonym, antonym) ' + \
+              'VALUES("%s", "%s", "%s", "%s")' % (uuid_str, word, synonym_str, antonym_str)
+
+        cur.execute(sql) 
+        con.commit()
+
